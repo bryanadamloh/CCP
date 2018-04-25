@@ -5,7 +5,7 @@ import java.util.Date;
 class Bus implements Runnable {
     Depot dpot;
     String name;
-    Date inTime;
+    String inTime;
     
     public Bus(Depot dpot)
     {
@@ -17,17 +17,17 @@ class Bus implements Runnable {
         return name;
     }
     
-    public Date getInTime()
+    public String getInTime()
     {
         return inTime;
     }
     
-    public void setName(String busName)
+    public void setName(String name)
     {
         this.name = name;
     }
     
-    public void setInTime(Date inTime)
+    public void setInTime(String inTime)
     {
         this.inTime = inTime;
     }
