@@ -8,23 +8,29 @@ class BusGenerator implements Runnable {
     
     Depot dpot;
     public boolean depotClosingTime = false;
+    public int num;
     
-    public BusGenerator(Depot dpot)
+    public BusGenerator(Depot dpot, int busNum)
     {
         this.dpot = dpot;
+        this.num = busNum;
     }
     
     public void run()
     {
-        while(!depotClosingTime)
+        int busCounter = 1;
+        
+        while(!depotClosingTime && busCounter != num + 1)
         {
             Bus bus = new Bus(dpot);
             Date date = new Date();
-            SimpleDateFormat ft = new SimpleDateFormat("hh:mm");
+            SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss");
             bus.setInTime(ft.format(date));
+            
             Thread thBus = new Thread(bus);
-            bus.setName("Thread-Bus " + thBus.getId());
+            bus.setName("Bus " + busCounter);
             thBus.start();
+            busCounter++;
             
             try
             {
@@ -34,6 +40,7 @@ class BusGenerator implements Runnable {
             {
                 i.printStackTrace();
             }
+            
         }
         if(depotClosingTime)
         {
