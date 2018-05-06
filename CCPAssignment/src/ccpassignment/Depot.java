@@ -10,7 +10,7 @@ class Depot {
     int ramp = 0; 
     Random r = new Random();
     List<Bus> listBus;
-    List<Bus> beforeWaitingArea;
+    List<Bus> serviceWaitingArea;
     List<Bus> repair;
     List<Bus> clean;
     List<Bus> afterWaitingArea;
@@ -18,19 +18,19 @@ class Depot {
     public Depot()
     {
         listBus = new LinkedList<Bus>();
-        beforeWaitingArea = new LinkedList<Bus>();
+        serviceWaitingArea = new LinkedList<Bus>();
         repair = new LinkedList<Bus>();
         clean = new LinkedList<Bus>();
         afterWaitingArea = new LinkedList<Bus>();
     }
     
-    public void addBus(Bus busService)
+    public void addBus(Bus bus)
     {
-        System.out.println("Thread-" + busService.getName() + ": Entering the waiting area at " + busService.getInTime());
+        System.out.println("Thread-" + bus.getName() + ": Entering the waiting area at " + bus.getInTime());
         
-        synchronized(listBus)
+        synchronized (listBus)
         {
-            ((LinkedList<Bus>)listBus).offer(busService);
+            ((LinkedList<Bus>)listBus).offer(bus);
             listBus.notify();
         }
     }
@@ -54,13 +54,13 @@ class Depot {
             {        
                 ramp = 1;
                 System.out.println("Thread-" + bus.getName() + ": Acquiring ramp at " + bus.getInTime() + "!");
-                busDuration = (long)(Math.random()*10);
+                busDuration = (long)(Math.random()*5);
                 TimeUnit.SECONDS.sleep(busDuration);
                 System.out.println("Thread-" + bus.getName() + " took " + busDuration + " seconds to get the ramp!");
                 System.out.println("Thread-" + bus.getName() + ": Entering service waiting area at " + bus.getInTime() + "!\n");
                 ramp = 0;
 
-                ((LinkedList<Bus>)beforeWaitingArea).offer(bus);
+                ((LinkedList<Bus>)serviceWaitingArea).offer(bus);
                 if(listBus.size() == 1)
                 {
                     listBus.notify();
@@ -76,7 +76,7 @@ class Depot {
         
         if(ranNum == 1)
         {
-            bus = (Bus) ((LinkedList<?>)beforeWaitingArea).poll();
+            bus = (Bus) ((LinkedList<?>)serviceWaitingArea).poll();
             ((LinkedList<Bus>)repair).offer(bus);
             synchronized(repair)
             {
@@ -85,7 +85,7 @@ class Depot {
         }
         else if(ranNum == 2)
         {
-            bus = (Bus) ((LinkedList<?>)beforeWaitingArea).poll();
+            bus = (Bus) ((LinkedList<?>)serviceWaitingArea).poll();
             ((LinkedList<Bus>)clean).offer(bus);
             synchronized(clean)
             {
@@ -112,7 +112,7 @@ class Depot {
             try
             {
                 System.out.println("Cleaning " + bus.getName());
-                duration = (long)(Math.random()*5);
+                duration = (long)(Math.random()*5) + 5;
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus cleaning is completed in " + duration + " seconds!");
                 System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
@@ -178,7 +178,7 @@ class Depot {
             try
             {
                 System.out.println("Repairing " + bus.getName());
-                duration = (long)(Math.random()*5);
+                duration = (long)(Math.random()*5) + 5;
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus repairing is completed in " + duration + " seconds!");
                 System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
