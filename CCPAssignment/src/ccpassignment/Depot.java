@@ -38,36 +38,46 @@ class Depot {
     public void rampEntrance() throws InterruptedException
     {
         long busDuration = 0;
+        Bus bus;
         
         synchronized (listBus)
         {
             while(listBus.isEmpty())
             {
                 System.out.println("Please wait!\n");
-                listBus.wait();
+                try
+                {
+                    listBus.wait();
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
+                }
             }
             
-            Bus bus = (Bus)((LinkedList<Bus>)listBus).poll();
+            bus = (Bus)((LinkedList<Bus>)listBus).poll();
             System.out.println("Thread-" + bus.getName() + ": Request for entrance to the ramp!");
             
-            if(rampCheck(bus) == 0)
-            {        
-                ramp = 1;
-                System.out.println("Thread-" + bus.getName() + ": Acquiring ramp at " + bus.getInTime() + "!");
-                busDuration = (long)(Math.random()*5);
-                TimeUnit.SECONDS.sleep(busDuration);
-                System.out.println("Thread-" + bus.getName() + " took " + busDuration + " seconds to get the ramp!");
-                System.out.println("Thread-" + bus.getName() + ": Entering service waiting area at " + bus.getInTime() + "!\n");
-                ramp = 0;
-
-                ((LinkedList<Bus>)serviceWaitingArea).offer(bus);
-                if(listBus.size() == 1)
-                {
-                    listBus.notify();
-                }
-                chooseService(bus);
+            if(listBus.size() == 1)
+            {
+                listBus.notify();
             }
-        }    
+        }   
+        
+        if(rampCheck(bus) == 0)
+        {        
+            ramp = 1;
+            System.out.println("Thread-" + bus.getName() + ": Acquiring ramp at " + bus.getInTime() + "!");
+            busDuration = (long)(Math.random()*5);
+            TimeUnit.SECONDS.sleep(busDuration);
+            System.out.println("Thread-" + bus.getName() + " took " + busDuration + " seconds to get the ramp!");
+            System.out.println("Thread-" + bus.getName() + ": Entering service waiting area at " + bus.getInTime() + "!\n");
+            ramp = 0;
+
+            ((LinkedList<Bus>)serviceWaitingArea).offer(bus);
+            chooseService(bus);
+        }
+           
     }
     
     public void chooseService(Bus bus)
@@ -112,7 +122,7 @@ class Depot {
             try
             {
                 System.out.println("Cleaning " + bus.getName());
-                duration = (long)(Math.random()*5) + 5;
+                duration = (long)(Math.random()*5);
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus cleaning is completed in " + duration + " seconds!");
                 System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
@@ -129,18 +139,29 @@ class Depot {
             }
         }
         
-        //When the bus reaches the ramp and exiting the depot
-        long busDuration = 0;
-
-        while(afterWaitingArea.isEmpty())
+        //When the bus reaches the ramp and exiting the depot 
+        synchronized (afterWaitingArea)
         {
-            System.out.println("Waiting for bus!");
-            afterWaitingArea.wait();
+             while(afterWaitingArea.isEmpty())
+            {
+                System.out.println("Waiting for bus!");
+                try
+                {
+                    afterWaitingArea.wait();
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
+                }                
+            }
         }
+       
         Bus busCount = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
-
+        System.out.println("Thread-" + busCount.getName() + ": Request for entrance to the ramp!");
+        
         if(rampCheck(busCount) == 0)
         {
+            long busDuration = 0;
             try
             {
                 ramp = 1;
@@ -178,7 +199,7 @@ class Depot {
             try
             {
                 System.out.println("Repairing " + bus.getName());
-                duration = (long)(Math.random()*5) + 5;
+                duration = (long)(Math.random()*5);
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus repairing is completed in " + duration + " seconds!");
                 System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
@@ -196,17 +217,28 @@ class Depot {
         }
         
         //When the bus reaches the ramp and exiting the depot
-        long busDuration = 0;
-
-        while(afterWaitingArea.isEmpty())
+        synchronized (afterWaitingArea)
         {
-            System.out.println("Waiting for bus!");
-            afterWaitingArea.wait();
+             while(afterWaitingArea.isEmpty())
+            {
+                System.out.println("Waiting for bus!");
+                try
+                {
+                    afterWaitingArea.wait();
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
+                }                
+            }
         }
+       
         Bus busCount = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
-
+        System.out.println("Thread-" + busCount.getName() + ": Request for entrance to the ramp!");
+        
         if(rampCheck(busCount) == 0)
         {
+            long busDuration = 0;
             try
             {
                 ramp = 1;
@@ -223,6 +255,7 @@ class Depot {
             System.out.println("Thread-" + busCount.getName() + " took " + busDuration + " seconds to exit the ramp!");
             System.out.println("Thread-" + busCount.getName() + ": Exiting depot!\n");               
         }
+        
     }
     
     //Check whether the ramp is empty or not
