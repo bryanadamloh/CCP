@@ -9,8 +9,6 @@ public class mainClass {
         int numBus, numCleaner, numMechanics;
         
         Depot dpot = new Depot();
-        DepotRamp dr = new DepotRamp(dpot);
-        Thread thdr = new Thread(dr);
         
         Scanner scan = new Scanner(System.in);
         
@@ -22,6 +20,10 @@ public class mainClass {
         numMechanics = scan.nextInt();
         
         System.out.println("Bus Depot is open!");
+        
+        //Ramp for buses
+        DepotRamp dr = new DepotRamp(dpot);
+        Thread thdr = new Thread(dr);
         
         //Generate number of buses
         BusGenerator bg = new BusGenerator(dpot, numBus);
@@ -35,11 +37,15 @@ public class mainClass {
         Mechanic m = new Mechanic(dpot, numMechanics);
         Thread thM = new Thread(m);
         
+        //Clock for closing time
+        ClosingClock cc = new ClosingClock(bg, c, m, dr);
+        Thread thcc = new Thread(cc);
+        
         thbg.start();
         thdr.start();
         thC.start();
         thM.start();
-        
+        thcc.start();
         
     }
     

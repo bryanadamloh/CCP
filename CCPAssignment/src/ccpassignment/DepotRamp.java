@@ -52,6 +52,5 @@ class DepotRamp implements Runnable{
     public synchronized void setDepotClosingTime()
     {
         depotClosingTime = true;
-        System.out.println("Bus station is closing soon!");
     }
 }

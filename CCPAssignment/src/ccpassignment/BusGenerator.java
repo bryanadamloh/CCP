@@ -59,6 +59,5 @@ class BusGenerator implements Runnable {
     public synchronized void setDepotClosingTime()
     {
         depotClosingTime = true;
-        System.out.println("Its closing time!");
     }
 }
