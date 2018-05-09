@@ -4,19 +4,17 @@ class Mechanic implements Runnable {
     
     Depot dpot;
     public boolean depotClosingTime = false;
-    public int num;
     
-    public Mechanic(Depot dpot, int mechanicNum)
+    public Mechanic(Depot dpot)
     {
         this.dpot = dpot;
-        this.num = mechanicNum;
     }
     
     public void run()
     {
         int counter = 1;
         
-        while(counter != num + 1)
+        while(counter != 3)
         {
             try
             {
@@ -61,7 +59,7 @@ class Mechanic implements Runnable {
     public synchronized void setDepotClosingTime()
     {
         depotClosingTime = true;
-        System.out.println("Mechanic Service is closed now!");
+        System.out.println("Mechanic Service is closed now!\n");
     }
         
 }
