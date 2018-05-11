@@ -8,6 +8,7 @@ class ClosingClock implements Runnable {
     public Cleaner CL;
     public Mechanic ME;
     public DepotRamp DR;
+    public CleanRamp CR;
     public Depot D;
     public Boolean closingTime;
     
@@ -21,12 +22,13 @@ class ClosingClock implements Runnable {
         closingTime = false;
     }
     
-    public ClosingClock (Depot dpot, BusGenerator bg, Mechanic m, DepotRamp dr)
+    public ClosingClock (Depot dpot, BusGenerator bg, Mechanic m, DepotRamp dr, CleanRamp cr)
     {
         D = dpot;
         BG = bg;
         ME = m;
         DR = dr;
+        CR = cr;
         closingTime = false;
     }
     
@@ -58,6 +60,7 @@ class ClosingClock implements Runnable {
         BG.setDepotClosingTime();
         ME.setDepotClosingTime();
         DR.setDepotClosingTime();
+        CR.setDepotClosingTime();
     }
     
     public void notifyClosingTimeSunny()

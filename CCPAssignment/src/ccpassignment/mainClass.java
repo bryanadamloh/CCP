@@ -39,7 +39,7 @@ public class mainClass {
             Thread thcr = new Thread(cr);
             
             //Clock for closing time
-            ClosingClock cc = new ClosingClock(dpot, bg, m, dr);
+            ClosingClock cc = new ClosingClock(dpot, bg, m, dr, cr);
             Thread thcc = new Thread(cc);
 
             thbg.start();
