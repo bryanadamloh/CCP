@@ -42,10 +42,12 @@ class ClosingClock implements Runnable {
             if(weather.equals("Y") || weather.equals("y"))
             {
                 notifyClosingTimeRain();
+                D.setClosingTime();
             }
             else if(weather.equals("N") || weather.equals("n"))
             {
                 notifyClosingTimeSunny();
+                D.setClosingTime();
             }
         }
         catch (InterruptedException i)

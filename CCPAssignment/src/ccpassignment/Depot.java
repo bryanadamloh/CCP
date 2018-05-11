@@ -45,7 +45,7 @@ class Depot {
         
         synchronized (listBus)
         {
-            while(listBus.isEmpty())
+            while(listBus.isEmpty() && cTime == false)
             {
                 System.out.println("Please wait!\n");
                 try
@@ -58,27 +58,30 @@ class Depot {
                 }
             }
             
-            bus = (Bus)((LinkedList<Bus>)listBus).poll();
-            System.out.println("Thread-" + bus.getName() + ": Request for entrance to the ramp!");
-            
-            if(rampCheck(bus) == 0)
-            {        
-                ramp = 1;
-                System.out.println("Thread-" + bus.getName() + ": Acquiring ramp at " + bus.getInTime() + "!");
-                busDuration = (long)(Math.random()*2);
-                TimeUnit.SECONDS.sleep(busDuration);
-                System.out.println("Thread-" + bus.getName() + " took " + busDuration + " seconds to get the ramp!");
-                System.out.println("Thread-" + bus.getName() + ": Entering service waiting area at " + bus.getInTime() + "!\n");
-                ramp = 0;
-
-                ((LinkedList<Bus>)serviceWaitingArea).offer(bus);
-                chooseService(bus);
-            }
-            else if(rampCheck(bus) == 1)
+            if(cTime == false)
             {
-                System.out.println("\nRamp is full! Please try again!\n");
-                ((LinkedList<Bus>)listBus).offer(bus);
-                ramp = 0;
+                bus = (Bus)((LinkedList<Bus>)listBus).poll();
+                System.out.println("Thread-" + bus.getName() + ": Request for entrance to the ramp!");
+
+                if(rampCheck(bus) == 0)
+                {        
+                    ramp = 1;
+                    System.out.println("Thread-" + bus.getName() + ": Acquiring ramp at " + bus.getInTime() + "!");
+                    busDuration = (long)(Math.random()*2);
+                    TimeUnit.SECONDS.sleep(busDuration);
+                    System.out.println("Thread-" + bus.getName() + " took " + busDuration + " seconds to get the ramp!");
+                    System.out.println("Thread-" + bus.getName() + ": Entering service waiting area at " + bus.getInTime() + "!\n");
+                    ramp = 0;
+
+                    ((LinkedList<Bus>)serviceWaitingArea).offer(bus);
+                    chooseService(bus);
+                }
+                else if(rampCheck(bus) == 1)
+                {
+                    System.out.println("\nRamp is full! Please try again!\n");
+                    ((LinkedList<Bus>)listBus).offer(bus);
+                    ramp = 0;
+                }
             }
             
             if(listBus.size() == 1)
@@ -140,40 +143,44 @@ class Depot {
         //Cleaning bus process
         synchronized (clean)
         {
-            while(clean.isEmpty())
+            while(clean.isEmpty() && cTime == false)
             {
                 System.out.println("Cleaner is waiting for the bus!");
                 clean.wait();
             }
             
-            Bus bus = (Bus) ((LinkedList<?>)clean).poll();
-            System.out.println("Thread-" + bus.getName()+ ": Reached cleaning bay at " + bus.getInTime() + "!");
-            
-            try
+            if(cTime == false)
             {
-                System.out.println("Cleaner is cleaning " + bus.getName());
-                duration = (long)(Math.random()*5)+5;
-                TimeUnit.SECONDS.sleep(duration);
-                System.out.println("Thread-" + bus.getName() + ": Bus cleaning is completed in " + duration + " seconds!");
-                System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
-                
-                ((LinkedList<Bus>)afterWaitingArea).offer(bus);
-                //Notifies afterWaitingArea object to wake up a thread
-                synchronized (afterWaitingArea)
+                Bus bus = (Bus) ((LinkedList<?>)clean).poll();
+                System.out.println("Thread-" + bus.getName()+ ": Reached cleaning bay at " + bus.getInTime() + "!");
+
+                try
                 {
-                    afterWaitingArea.notify();
+                    System.out.println("Cleaner is cleaning " + bus.getName());
+                    duration = (long)(Math.random()*5)+5;
+                    TimeUnit.SECONDS.sleep(duration);
+                    System.out.println("Thread-" + bus.getName() + ": Bus cleaning is completed in " + duration + " seconds!");
+                    System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
+
+                    ((LinkedList<Bus>)afterWaitingArea).offer(bus);
+                    //Notifies afterWaitingArea object to wake up a thread
+                    synchronized (afterWaitingArea)
+                    {
+                        afterWaitingArea.notify();
+                    }
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
                 }
             }
-            catch (InterruptedException i)
-            {
-                i.printStackTrace();
-            }
+            
         }
         
         //When the bus reaches the ramp and exiting the depot 
         synchronized (afterWaitingArea)
         {
-             while(afterWaitingArea.isEmpty())
+             while(afterWaitingArea.isEmpty() && cTime == false)
             {
                 System.out.println("Waiting for bus!");
                 try
@@ -186,33 +193,36 @@ class Depot {
                 }                
             }
              
-            busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
-            System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
-               
-            if(rampCheck(busExit) == 0)
+            if(cTime == false)
             {
-                long busDuration = 0;
-                try
+                busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
+                System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
+
+                if(rampCheck(busExit) == 0)
                 {
-                    ramp = 1;
-                    System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
-                    busDuration = (long)(Math.random()*2);
-                    TimeUnit.SECONDS.sleep(busDuration);
+                    long busDuration = 0;
+                    try
+                    {
+                        ramp = 1;
+                        System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
+                        busDuration = (long)(Math.random()*2);
+                        TimeUnit.SECONDS.sleep(busDuration);
+                        ramp = 0;
+                    }
+                    catch (InterruptedException i)
+                    {
+                        i.printStackTrace();
+                    }
+
+                    System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
+                    System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
+                }
+                else if(rampCheck(busExit) == 1)
+                {
+                    System.out.println("\nRamp is full! Please try again!\n");
+                    ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
                     ramp = 0;
                 }
-                catch (InterruptedException i)
-                {
-                    i.printStackTrace();
-                }
-
-                System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
-                System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
-            }
-            else if(rampCheck(busExit) == 1)
-            {
-                System.out.println("\nRamp is full! Please try again!\n");
-                ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
-                ramp = 0;
             }
             
             if(afterWaitingArea.size() == 1)
@@ -230,39 +240,43 @@ class Depot {
         //Repairing bus process
         synchronized (repair)
         {
-            while(repair.isEmpty())
+            while(repair.isEmpty() && cTime == false)
             {
                 System.out.println("Mechanic is waiting for the bus!");
                 repair.wait();
             }
             
-            Bus bus = (Bus)((LinkedList<?>)repair).poll();
-            System.out.println("Thread-" + bus.getName()+ ": Reached mechanic bay at " + bus.getInTime() + "!");
-            
-            try
+            if(cTime == false)
             {
-                System.out.println("Mechanic is repairing " + bus.getName());
-                duration = (long)(Math.random()*5)+5;
-                TimeUnit.SECONDS.sleep(duration);
-                System.out.println("Thread-" + bus.getName() + ": Bus repairing is completed in " + duration + " seconds!");
-                System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
-                
-                ((LinkedList<Bus>)afterWaitingArea).offer(bus);
-                synchronized (afterWaitingArea)
+                Bus bus = (Bus)((LinkedList<?>)repair).poll();
+                System.out.println("Thread-" + bus.getName()+ ": Reached mechanic bay at " + bus.getInTime() + "!");
+
+                try
                 {
-                    afterWaitingArea.notify();
+                    System.out.println("Mechanic is repairing " + bus.getName());
+                    duration = (long)(Math.random()*5)+5;
+                    TimeUnit.SECONDS.sleep(duration);
+                    System.out.println("Thread-" + bus.getName() + ": Bus repairing is completed in " + duration + " seconds!");
+                    System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
+
+                    ((LinkedList<Bus>)afterWaitingArea).offer(bus);
+                    synchronized (afterWaitingArea)
+                    {
+                        afterWaitingArea.notify();
+                    }
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
                 }
             }
-            catch (InterruptedException i)
-            {
-                i.printStackTrace();
-            }
+            
         }
         
         //When the bus reaches the ramp and exiting the depot
         synchronized (afterWaitingArea)
         {
-            while(afterWaitingArea.isEmpty())
+            while(afterWaitingArea.isEmpty() && cTime == false)
             {
                 System.out.println("Waiting for bus!");
                 try
@@ -275,33 +289,36 @@ class Depot {
                 }                
             }
              
-            busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
-            System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
-                
-            if(rampCheck(busExit) == 0)
+            if(cTime == false)
             {
-                long busDuration = 0;
-                try
+                busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
+                System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
+
+                if(rampCheck(busExit) == 0)
                 {
-                    ramp = 1;
-                    System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
-                    busDuration = (long)(Math.random()*2);
-                    TimeUnit.SECONDS.sleep(busDuration);
+                    long busDuration = 0;
+                    try
+                    {
+                        ramp = 1;
+                        System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
+                        busDuration = (long)(Math.random()*2);
+                        TimeUnit.SECONDS.sleep(busDuration);
+                        ramp = 0;
+                    }
+                    catch (InterruptedException i)
+                    {
+                        i.printStackTrace();
+                    }
+
+                    System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
+                    System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
+                }
+                else if(rampCheck(busExit) == 1)
+                {
+                    System.out.println("\nRamp is full! Please try again!\n");
+                    ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
                     ramp = 0;
                 }
-                catch (InterruptedException i)
-                {
-                    i.printStackTrace();
-                }
-
-                System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
-                System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
-            }
-            else if(rampCheck(busExit) == 1)
-            {
-                System.out.println("\nRamp is full! Please try again!\n");
-                ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
-                ramp = 0;
             }
                     
             if(afterWaitingArea.size() == 1)
@@ -319,7 +336,7 @@ class Depot {
         
         synchronized (afterWaitingArea)
         {
-            while(afterWaitingArea.isEmpty())
+            while(afterWaitingArea.isEmpty() && cTime == false)
             {
                 System.out.println("Waiting for bus!");
                 try
@@ -331,34 +348,37 @@ class Depot {
                     i.printStackTrace();
                 }                
             }
-             
-            busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
-            System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
-                
-            if(rampCheck(busExit) == 0)
+            
+            if(cTime == false)
             {
-                long busDuration = 0;
-                try
+                busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
+                System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
+
+                if(rampCheck(busExit) == 0)
                 {
-                    ramp = 1;
-                    System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
-                    busDuration = (long)(Math.random()*2);
-                    TimeUnit.SECONDS.sleep(busDuration);
+                    long busDuration = 0;
+                    try
+                    {
+                        ramp = 1;
+                        System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
+                        busDuration = (long)(Math.random()*2);
+                        TimeUnit.SECONDS.sleep(busDuration);
+                        ramp = 0;
+                    }
+                    catch (InterruptedException i)
+                    {
+                        i.printStackTrace();
+                    }
+
+                    System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
+                    System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
+                }
+                else if(rampCheck(busExit) == 1)
+                {
+                    System.out.println("\nRamp is full! Please try again!\n");
+                    ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
                     ramp = 0;
                 }
-                catch (InterruptedException i)
-                {
-                    i.printStackTrace();
-                }
-
-                System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
-                System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
-            }
-            else if(rampCheck(busExit) == 1)
-            {
-                System.out.println("\nRamp is full! Please try again!\n");
-                ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
-                ramp = 0;
             }
                     
             if(afterWaitingArea.size() == 1)
@@ -384,5 +404,31 @@ class Depot {
         }
         
         return ramp;
+    }
+    
+    public void setClosingTime()
+    {
+        cTime = true;
+        
+        synchronized (listBus)
+        {
+            listBus.notify();
+        }
+        synchronized (serviceWaitingArea)
+        {
+            serviceWaitingArea.notify();
+        }
+        synchronized (clean)
+        {
+            clean.notify();
+        }
+        synchronized (repair)
+        {
+            repair.notify();
+        }
+        synchronized (afterWaitingArea)
+        {
+            afterWaitingArea.notify();
+        }
     }
 }
