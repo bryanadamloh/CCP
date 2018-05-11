@@ -23,11 +23,10 @@ class Mechanic implements Runnable {
             catch (InterruptedException i)
             {
                 i.printStackTrace();
-            }
-
-            System.out.println("Mechanic " + counter + " is ready!");
+            } 
             
-            counter++;
+            System.out.println("Mechanic " + counter + " is ready!");
+            counter++;          
         }
         
         while(!depotClosingTime)

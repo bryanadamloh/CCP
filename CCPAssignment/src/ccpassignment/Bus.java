@@ -1,11 +1,9 @@
 package ccpassignment;
 
-import java.util.Date;
-
 class Bus implements Runnable {
     Depot dpot;
-    String name;
-    String inTime;
+    private String name;
+    private String inTime;
     
     public Bus(Depot dpot)
     {

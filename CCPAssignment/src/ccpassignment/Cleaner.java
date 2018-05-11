@@ -26,9 +26,8 @@ class Cleaner implements Runnable{
             {
                 i.printStackTrace();
             }
-
-            System.out.println("Cleaner " + counter + " is ready!");
             
+            System.out.println("Cleaner " + counter + " is ready!");           
             counter++;
         }
         

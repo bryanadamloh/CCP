@@ -137,6 +137,7 @@ class Depot {
         long duration = 0;
         Bus busExit;
         
+        //Cleaning bus process
         synchronized (clean)
         {
             while(clean.isEmpty())
@@ -150,13 +151,14 @@ class Depot {
             
             try
             {
-                System.out.println("Cleaning " + bus.getName());
+                System.out.println("Cleaner is cleaning " + bus.getName());
                 duration = (long)(Math.random()*5)+5;
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus cleaning is completed in " + duration + " seconds!");
                 System.out.println("Thread-" + bus.getName() + ": Entering depot waiting area at " + bus.getInTime() + "!\n");
                 
                 ((LinkedList<Bus>)afterWaitingArea).offer(bus);
+                //Notifies afterWaitingArea object to wake up a thread
                 synchronized (afterWaitingArea)
                 {
                     afterWaitingArea.notify();
@@ -215,7 +217,7 @@ class Depot {
             
             if(afterWaitingArea.size() == 1)
             {
-                afterWaitingArea.notifyAll();
+                afterWaitingArea.notify();
             }
         }
     }
@@ -225,6 +227,7 @@ class Depot {
         long duration = 0;
         Bus busExit;
         
+        //Repairing bus process
         synchronized (repair)
         {
             while(repair.isEmpty())
@@ -238,7 +241,7 @@ class Depot {
             
             try
             {
-                System.out.println("Repairing " + bus.getName());
+                System.out.println("Mechanic is repairing " + bus.getName());
                 duration = (long)(Math.random()*5)+5;
                 TimeUnit.SECONDS.sleep(duration);
                 System.out.println("Thread-" + bus.getName() + ": Bus repairing is completed in " + duration + " seconds!");
@@ -303,10 +306,66 @@ class Depot {
                     
             if(afterWaitingArea.size() == 1)
             {
-                afterWaitingArea.notifyAll();
+                afterWaitingArea.notify();
             }
         }
         
+    }
+    
+    //Ramp exit when cleaning bay is closed and bus straight goes into afterWaitingArea object
+    public void cleanRampExit() throws InterruptedException
+    {
+        Bus busExit;
+        
+        synchronized (afterWaitingArea)
+        {
+            while(afterWaitingArea.isEmpty())
+            {
+                System.out.println("Waiting for bus!");
+                try
+                {
+                    afterWaitingArea.wait();
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
+                }                
+            }
+             
+            busExit = (Bus) ((LinkedList<?>)afterWaitingArea).poll();
+            System.out.println("Thread-" + busExit.getName() + ": Request for entrance to the ramp!");
+                
+            if(rampCheck(busExit) == 0)
+            {
+                long busDuration = 0;
+                try
+                {
+                    ramp = 1;
+                    System.out.println("Thread-" + busExit.getName() + ": Acquiring ramp at " + busExit.getInTime() + "!");
+                    busDuration = (long)(Math.random()*2);
+                    TimeUnit.SECONDS.sleep(busDuration);
+                    ramp = 0;
+                }
+                catch (InterruptedException i)
+                {
+                    i.printStackTrace();
+                }
+
+                System.out.println("Thread-" + busExit.getName() + " took " + busDuration + " seconds to exit the ramp!");
+                System.out.println("Thread-" + busExit.getName() + ": Exiting depot!\n");               
+            }
+            else if(rampCheck(busExit) == 1)
+            {
+                System.out.println("\nRamp is full! Please try again!\n");
+                ((LinkedList<Bus>)afterWaitingArea).offer(busExit);
+                ramp = 0;
+            }
+                    
+            if(afterWaitingArea.size() == 1)
+            {
+                afterWaitingArea.notifyAll();
+            }
+        }
     }
     
     //Check whether the ramp is empty or not

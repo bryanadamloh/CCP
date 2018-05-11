@@ -21,7 +21,7 @@ public class mainClass {
             numBus = scan.nextInt();
             
             Depot dpot = new Depot(weather);
-        
+            
             //Ramp for buses
             DepotRamp dr = new DepotRamp(dpot);
             Thread thdr = new Thread(dr);
@@ -34,6 +34,10 @@ public class mainClass {
             Mechanic m = new Mechanic(dpot);
             Thread thM = new Thread(m);
 
+            //Exit Ramp for closed cleaning bay
+            CleanRamp cr = new CleanRamp(dpot);
+            Thread thcr = new Thread(cr);
+            
             //Clock for closing time
             ClosingClock cc = new ClosingClock(dpot, bg, m, dr);
             Thread thcc = new Thread(cc);
@@ -41,6 +45,7 @@ public class mainClass {
             thbg.start();
             thdr.start();
             thM.start();
+            thcr.start();
             thcc.start();
         }
         else if(weather.equals("N") || weather.equals("n"))
@@ -52,7 +57,7 @@ public class mainClass {
             numCleaner = scan.nextInt();
             
             Depot dpot = new Depot(weather);
-        
+            
             //Ramp for buses
             DepotRamp dr = new DepotRamp(dpot);
             Thread thdr = new Thread(dr);
