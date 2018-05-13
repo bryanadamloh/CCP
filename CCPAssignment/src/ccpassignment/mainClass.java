@@ -6,7 +6,7 @@ public class mainClass {
     
     public static void main(String[] args) {
         
-        int numBus, numCleaner;
+        int numBus, numCleaner, timeTaken;
         String weather;
         
         Scanner scan = new Scanner(System.in);
@@ -19,8 +19,10 @@ public class mainClass {
             System.out.println("Today is raining! Cleaning bay is closed!");
             System.out.println("Enter the number of buses:");
             numBus = scan.nextInt();
+            System.out.println("Time taken for each service:");
+            timeTaken = scan.nextInt();
             
-            Depot dpot = new Depot(weather);
+            Depot dpot = new Depot(weather, timeTaken);
             
             //Ramp for buses
             DepotRamp dr = new DepotRamp(dpot);
@@ -55,8 +57,10 @@ public class mainClass {
             numBus = scan.nextInt();
             System.out.println("Enter the number of cleaner:");
             numCleaner = scan.nextInt();
+            System.out.println("Time taken for each service:");
+            timeTaken = scan.nextInt();
             
-            Depot dpot = new Depot(weather);
+            Depot dpot = new Depot(weather, timeTaken);
             
             //Ramp for buses
             DepotRamp dr = new DepotRamp(dpot);
