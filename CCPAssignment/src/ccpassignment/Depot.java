@@ -191,11 +191,6 @@ class Depot {
                 }
             }
             
-            if(clean.size() == 1)
-            {
-                clean.notify();
-            }
-            
         }
         
         //When the bus reaches the ramp and exiting the depot 
@@ -289,11 +284,7 @@ class Depot {
                     i.printStackTrace();
                 }
             }
-            
-            if(repair.size() == 1)
-            {
-                repair.notify();
-            }
+
         }
         
         //When the bus reaches the ramp and exiting the depot
